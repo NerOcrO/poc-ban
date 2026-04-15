@@ -126,6 +126,9 @@
                             <button class="fr-btn" id="geoloc-btn">
                                 Me géolocaliser
                             </button>
+                            <div id="geoloc-error" class="fr-alert fr-alert--error fr-mt-2w" style="display: none;">
+                                <p id="geoloc-error-message"></p>
+                            </div>
                             <p id="user-coords" class="fr-text--sm fr-mt-1w" style="color: var(--text-mention-grey);">Position non définie</p>
                         </div>
                     </div>
@@ -342,8 +345,15 @@
 
         // Géolocalisation de l'utilisateur
         function getUserLocation() {
+            const geolocError = document.getElementById('geoloc-error');
+            const geolocErrorMessage = document.getElementById('geoloc-error-message');
+
+            // Masquer l'erreur précédente
+            geolocError.style.display = 'none';
+
             if (!navigator.geolocation) {
-                alert('La géolocalisation n\'est pas supportée par votre navigateur');
+                geolocErrorMessage.textContent = 'La géolocalisation n\'est pas supportée par votre navigateur.';
+                geolocError.style.display = 'block';
                 return;
             }
 
@@ -376,19 +386,20 @@
                 },
                 (error) => {
                     console.error('Erreur géolocalisation:', error);
-                    let message = 'Erreur de géolocalisation';
+                    let message = 'Une erreur est survenue lors de la géolocalisation.';
                     switch (error.code) {
                         case error.PERMISSION_DENIED:
-                            message = 'Vous avez refusé la géolocalisation';
+                            message = 'Vous avez refusé l\'accès à votre position. Pour utiliser cette fonctionnalité, veuillez autoriser la géolocalisation dans les paramètres de votre navigateur.';
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            message = 'Position indisponible';
+                            message = 'Votre position n\'a pas pu être déterminée. Vérifiez que le GPS est activé sur votre appareil.';
                             break;
                         case error.TIMEOUT:
-                            message = 'Délai d\'attente dépassé';
+                            message = 'La demande de position a pris trop de temps. Veuillez réessayer.';
                             break;
                     }
-                    alert(message);
+                    geolocErrorMessage.textContent = message;
+                    geolocError.style.display = 'block';
                     setLoading(geolocBtn, false, geolocBtnText);
                 }
             );
